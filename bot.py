@@ -1,5 +1,5 @@
 import logging
-from telegram.ext import Application, MessageHandler, filters
+from telegram.ext import Application, MessageHandler, CommandHandler, filters
 
 import settings
 # Отслеживание ошибок
@@ -12,6 +12,26 @@ def main():
         text = update.message.text
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}")
     
+    async def greet_user(update, context):
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать.")
+    
+    async def guess_number(update, context):
+        print(context.args)
+        if context.args:
+            try:
+                user_number = int(context.args[0])
+                message = f"Ваше число {user_number}"
+            except ValueError:
+                message = "Введите целое число"
+            except TypeError:
+                message = "Введите целое число"
+        else:
+            message = "Введите число"
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+    
+    application.add_handler(CommandHandler("start", greet_user))
+    application.add_handler(CommandHandler("guess", guess_number))
+
     # Добавляет обработчик событий, в данном случае обработчик сообщений, который принимает сообщения, 
     # не являющиеся коммандами и выполняет асинхронную функцию message, в которой возвращаем полученное сообщение
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message))
