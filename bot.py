@@ -1,6 +1,7 @@
 import logging
 from glob import glob
 from random import randint, choice
+import emoji
 from telegram.ext import Application, MessageHandler, CommandHandler, filters
 
 import settings
@@ -12,7 +13,13 @@ async def message(update, context):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}")
 
 async def greet_user(update, context):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать.")
+    smile = get_emoji()
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать. {smile}")
+
+def get_emoji(smile = settings.USER_EMOJI):
+    if type(smile) is list:
+        smile = choice(smile)
+    return emoji.emojize(smile)
 
 def play_random_numbers(user_number):
     bot_number = randint(user_number - 10, user_number + 10)
@@ -25,7 +32,6 @@ def play_random_numbers(user_number):
     return message
 
 async def guess_number(update, context):
-    print(context.args)
     if context.args:
         try:
             user_number = int(context.args[0])
@@ -40,7 +46,6 @@ async def send_cat_picture(update, context):
     cat_photos_list = glob('images/cat*.jp*g')
     cat_pic_filename = choice(cat_photos_list)
     await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(cat_pic_filename, 'rb'))
-
 
 def main():
     # Cоздание экземпляра класса Application
