@@ -13,13 +13,16 @@ async def message(update, context):
     await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}")
 
 async def greet_user(update, context):
-    smile = get_emoji()
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать. {smile}")
+    context.user_data['emoji'] = get_emoji(context.user_data)
 
-def get_emoji(smile = settings.USER_EMOJI):
-    if type(smile) is list:
-        smile = choice(smile)
-    return emoji.emojize(smile)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать. {context.user_data['emoji']}")
+
+def get_emoji(user_data, smile = settings.USER_EMOJI):
+    if 'emoji' not in user_data:
+        if type(smile) is list:
+            smile = choice(smile)
+        user_data['emoji'] = emoji.emojize(smile)
+    return user_data['emoji']
 
 def play_random_numbers(user_number):
     bot_number = randint(user_number - 10, user_number + 10)
