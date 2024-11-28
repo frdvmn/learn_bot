@@ -2,6 +2,7 @@ import logging
 from glob import glob
 from random import randint, choice
 import emoji
+from telegram import ReplyKeyboardMarkup
 from telegram.ext import Application, MessageHandler, CommandHandler, filters
 
 import settings
@@ -10,12 +11,21 @@ logging.basicConfig(filename="bot.log", level=logging.INFO)
 
 async def message(update, context):
     text = update.message.text
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}", reply_markup=main_keyboard())
 
 async def greet_user(update, context):
     context.user_data['emoji'] = get_emoji(context.user_data)
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать. {context.user_data['emoji']}")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Добро пожаловать. {context.user_data['emoji']}", reply_markup=main_keyboard())
+
+def main_keyboard():
+    keyboard = [
+        [
+            "Вызвать кота",
+            "/start"
+        ]
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
 
 def get_emoji(user_data, smile = settings.USER_EMOJI):
     if 'emoji' not in user_data:
@@ -57,6 +67,8 @@ def main():
     application.add_handler(CommandHandler("start", greet_user))
     application.add_handler(CommandHandler("guess", guess_number))
     application.add_handler(CommandHandler("cat", send_cat_picture))
+
+    application.add_handler(MessageHandler(filters.Regex('^(Вызвать кота)$'), send_cat_picture))
 
     # Добавляет обработчик событий, в данном случае обработчик сообщений, который принимает сообщения, 
     # не являющиеся коммандами и выполняет асинхронную функцию message, в которой возвращаем полученное сообщение
