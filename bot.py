@@ -2,7 +2,7 @@ import logging
 from glob import glob
 from random import randint, choice
 import emoji
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, MessageHandler, CommandHandler, filters
 
 import settings
@@ -22,7 +22,10 @@ def main_keyboard():
     keyboard = [
         [
             "Вызвать кота",
-            "/start"
+            "/start",
+        ],
+        [
+            KeyboardButton("Мои координаты", request_location=True)
         ]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
@@ -60,15 +63,24 @@ async def send_cat_picture(update, context):
     cat_pic_filename = choice(cat_photos_list)
     await context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(cat_pic_filename, 'rb'))
 
+async def user_coordinates(update, context):
+    context.user_data['emoji'] = get_emoji(context.user_data)
+    coords = update.message.location
+    print(coords.latitude)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{context.user_data['emoji']}Ваши координаты: \nШирина - {coords.latitude} \nДолгота - {coords.longitude}", reply_markup=main_keyboard())
+
+
 def main():
+    
     # Cоздание экземпляра класса Application
     application = Application.builder().token(settings.API_KEY).build()
-
+    
     application.add_handler(CommandHandler("start", greet_user))
     application.add_handler(CommandHandler("guess", guess_number))
     application.add_handler(CommandHandler("cat", send_cat_picture))
 
     application.add_handler(MessageHandler(filters.Regex('^(Вызвать кота)$'), send_cat_picture))
+    application.add_handler(MessageHandler(filters.LOCATION, user_coordinates))
 
     # Добавляет обработчик событий, в данном случае обработчик сообщений, который принимает сообщения, 
     # не являющиеся коммандами и выполняет асинхронную функцию message, в которой возвращаем полученное сообщение
