@@ -1,8 +1,10 @@
 import logging
 
-from telegram.ext import Application, MessageHandler, CommandHandler, filters
-from handlers import greet_user, guess_number, send_cat_picture, user_coordinates, message
+from telegram.ext import Application, MessageHandler, CommandHandler, ConversationHandler ,filters
+from handlers import (greet_user, guess_number, send_cat_picture, user_coordinates, message, 
+                      check_user_photo)
 
+from feedback import feedback_start, feedback_name, feedback_rating, feedback_comment, feedback_skip, feedback_dontknow
 import settings
 # Отслеживание ошибок
 logging.basicConfig(filename="bot.log", level=logging.INFO)
@@ -12,12 +14,35 @@ def main():
     # Cоздание экземпляра класса Application
     application = Application.builder().token(settings.API_KEY).build()
     
+    feedback = ConversationHandler(
+        entry_points=[
+            MessageHandler(filters.Regex('^(Заполнить анкету)$'), feedback_start)
+        ], 
+        states={
+            "name": [
+                MessageHandler(filters.TEXT, feedback_name)
+            ],
+            "rating": [
+                MessageHandler(filters.Regex("^(1|2|3|4|5)"), feedback_rating)
+            ],
+            "comment": [
+                CommandHandler('skip', feedback_skip),
+                MessageHandler(filters.TEXT, feedback_comment)
+            ] 
+        }, 
+        fallbacks=[
+            MessageHandler(filters.TEXT | filters.VIDEO | filters.ATTACHMENT | filters.LOCATION | filters.PHOTO, feedback_dontknow)
+        ]
+    )
+    application.add_handler(feedback)
+
     application.add_handler(CommandHandler("start", greet_user))
     application.add_handler(CommandHandler("guess", guess_number))
     application.add_handler(CommandHandler("cat", send_cat_picture))
 
     application.add_handler(MessageHandler(filters.Regex('^(Вызвать кота)$'), send_cat_picture))
     application.add_handler(MessageHandler(filters.LOCATION, user_coordinates))
+    application.add_handler(MessageHandler(filters.PHOTO, check_user_photo))
 
     # Добавляет обработчик событий, в данном случае обработчик сообщений, который принимает сообщения, 
     # не являющиеся коммандами и выполняет асинхронную функцию message, в которой возвращаем полученное сообщение

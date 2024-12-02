@@ -1,6 +1,8 @@
 from random import randint, choice
 import emoji
 import settings
+import requests
+
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
 def main_keyboard():
@@ -10,7 +12,8 @@ def main_keyboard():
             "/start",
         ],
         [
-            KeyboardButton("Мои координаты", request_location=True)
+            KeyboardButton("Мои координаты", request_location=True),
+            "Заполнить анкету",
         ]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
@@ -31,3 +34,9 @@ def play_random_numbers(user_number):
     else:
         message = f"Ваше число {user_number}, мое {bot_number}, вы проиграли"
     return message
+
+def is_cat():
+    pass
+
+if __name__ == "__main__":
+    pass

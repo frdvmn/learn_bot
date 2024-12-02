@@ -1,4 +1,6 @@
+import requests
 from glob import glob
+import os
 from random import choice
 from utils import play_random_numbers, get_emoji, main_keyboard
 
@@ -31,3 +33,13 @@ async def user_coordinates(update, context):
 async def message(update, context):
     text = update.message.text
     await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Вы написали: {text}", reply_markup=main_keyboard())
+
+async def check_user_photo(update, context):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Обрабатываем файл", reply_markup=main_keyboard())
+    user_photo = await context.bot.get_file(update.message.photo[-1])
+    file_name = os.path.join("downloads", f"{user_photo.file_id}.jpg")
+    response = requests.get(user_photo.file_path)
+    with open(file_name, "wb") as f:
+        f.write(response.content)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Фото сохранено на диск", reply_markup=main_keyboard())
+    

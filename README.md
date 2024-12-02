@@ -6,7 +6,7 @@
 
 1. Клонируйте репозитори с github
 2. Создайте виртуальное окружение
-3. Установите зависимости `pip install -r requirments.txt`
+3. Установите зависимости `pip install -r requirements.txt`
 4. Создайте файл `settings.py`
 5. Впишите в settings.py переменные:
 ```
