@@ -9,6 +9,7 @@ async def feedback_start(update, context):
         text=f"Привет, как тебя зовут ?", 
         reply_markup=ReplyKeyboardRemove()
     )
+    print(update.effective_chat.id)
     return "name"
 
 async def feedback_name(update, context):

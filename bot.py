@@ -1,10 +1,11 @@
 import logging
 
-from telegram.ext import Application, MessageHandler, CommandHandler, ConversationHandler ,filters
+from telegram.ext import Application, MessageHandler, CommandHandler, ConversationHandler, filters, JobQueue
 from handlers import (greet_user, guess_number, send_cat_picture, user_coordinates, message, 
                       check_user_photo)
 
 from feedback import feedback_start, feedback_name, feedback_rating, feedback_comment, feedback_skip, feedback_dontknow
+from jobs import send_hello
 import settings
 # Отслеживание ошибок
 logging.basicConfig(filename="bot.log", level=logging.INFO)
@@ -14,6 +15,10 @@ def main():
     # Cоздание экземпляра класса Application
     application = Application.builder().token(settings.API_KEY).build()
     
+    # Отправка сообщений с интервалом
+    jq = application.job_queue
+    jq.run_repeating(send_hello, interval=5, first=0)
+
     feedback = ConversationHandler(
         entry_points=[
             MessageHandler(filters.Regex('^(Заполнить анкету)$'), feedback_start)
