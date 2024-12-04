@@ -9,3 +9,6 @@ async def send_hello(context):
         await context.bot.send_message(chat_id=670283527, text=f"пока(") 
         context.job.enabled = False  # Временно отключить отправку
         context.job.schedule_removal()  # Полностью отключить отправку
+
+
+        # ИЗМЕНЕНИЕ
